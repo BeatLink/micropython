@@ -83,7 +83,16 @@
 #define MICROPY_PY_MACHINE_NFC_RESET_ENTRY
 #endif
 
+#if MICROPY_PY_MACHINE_DFU_BOOTLOADER
+#define MICROPY_PY_MACHINE_DFU_BOOTLOADER_ENTRY \
+    { MP_ROM_QSTR(MP_QSTR_enter_ota_dfu),      MP_ROM_PTR(&machine_enter_ota_dfu_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_enter_serial_dfu),   MP_ROM_PTR(&machine_enter_serial_dfu_obj) },
+#else
+#define MICROPY_PY_MACHINE_DFU_BOOTLOADER_ENTRY
+#endif
+
 #define MICROPY_PY_MACHINE_EXTRA_GLOBALS \
+    MICROPY_PY_MACHINE_DFU_BOOTLOADER_ENTRY \
     { MP_ROM_QSTR(MP_QSTR_info),               MP_ROM_PTR(&machine_info_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_sleep),              MP_ROM_PTR(&machine_lightsleep_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_Pin),                MP_ROM_PTR(&pin_type) }, \
@@ -188,6 +197,24 @@ MP_NORETURN void mp_machine_bootloader(size_t n_args, const mp_obj_t *args) {
     for (;;) {
     }
 }
+
+#if MICROPY_PY_MACHINE_DFU_BOOTLOADER
+static mp_obj_t machine_enter_ota_dfu(void) {
+    const int DFU_MAGIC_OTA_RESET = 0xa8;
+    NRF_POWER->GPREGRET = DFU_MAGIC_OTA_RESET;
+    NVIC_SystemReset();
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_0(machine_enter_ota_dfu_obj, machine_enter_ota_dfu);
+
+static mp_obj_t machine_enter_serial_dfu(void) {
+    const int DFU_MAGIC_SERIAL_ONLY_RESET = 0x4e;
+    NRF_POWER->GPREGRET = DFU_MAGIC_SERIAL_ONLY_RESET;
+    NVIC_SystemReset();
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_0(machine_enter_serial_dfu_obj, machine_enter_serial_dfu);
+#endif
 
 static void mp_machine_idle(void) {
     MICROPY_EVENT_POLL_HOOK;
