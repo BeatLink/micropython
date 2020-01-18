@@ -39,6 +39,9 @@
 #include "drivers/bluetooth/ble_uart.h"
 #include "shared/tinyusb/mp_usbd_cdc.h"
 #include "drivers/rng.h"
+#if MICROPY_HW_ENABLE_WDT
+#include "wdt.h"
+#endif
 
 #if MICROPY_PY_TIME_TICKS
 #include "nrfx_rtc.h"
@@ -247,6 +250,9 @@ int mp_hal_stdin_rx_chr(void) {
         if (dupterm_c >= 0) {
             return dupterm_c;
         }
+        #endif
+        #if MICROPY_PY_MACHINE_WDT
+        wdt_feed();
         #endif
         MICROPY_EVENT_POLL_HOOK
     }
