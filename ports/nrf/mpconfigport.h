@@ -87,7 +87,9 @@
 #define MICROPY_PY_ARRAY_SLICE_ASSIGN      (CORE_FEAT)
 #endif
 
+#ifndef MICROPY_PY_SYS_PLATFORM
 #define MICROPY_PY_SYS_PLATFORM            "nrf"
+#endif
 
 #ifndef MICROPY_PY_SYS_STDFILES
 #define MICROPY_PY_SYS_STDFILES            (CORE_FEAT)
