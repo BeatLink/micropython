@@ -252,7 +252,7 @@ int mp_hal_stdin_rx_chr(void) {
         }
         #endif
         #if MICROPY_PY_MACHINE_WDT
-        wdt_feed();
+        wdt_feed(false);
         #endif
         MICROPY_EVENT_POLL_HOOK
     }
