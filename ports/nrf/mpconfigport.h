@@ -187,6 +187,8 @@
 #define MICROPY_PY_RANDOM           (1)
 #define MICROPY_PY_RANDOM_EXTRA_FUNCS (1)
 #define MICROPY_PY_TIME             (1)
+#define MICROPY_PY_TIME_GMTIME_LOCALTIME_MKTIME (1)
+#define MICROPY_PY_TIME_INCLUDEFILE "ports/nrf/modtime.c"
 #define MICROPY_PY_MACHINE          (1)
 #define MICROPY_PY_MACHINE_INCLUDEFILE "ports/nrf/modules/machine/modmachine.c"
 #define MICROPY_PY_MACHINE_RESET    (1)
