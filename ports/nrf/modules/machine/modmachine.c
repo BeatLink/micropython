@@ -49,6 +49,9 @@
 #if MICROPY_PY_MACHINE_RTCOUNTER
 #include "rtcounter.h"
 #endif
+#if MICROPY_PY_MACHINE_WDT
+#include "wdt.h"
+#endif
 
 #define PYB_RESET_HARD      (0)
 #define PYB_RESET_WDT       (1)
@@ -83,6 +86,13 @@
 #define MICROPY_PY_MACHINE_NFC_RESET_ENTRY
 #endif
 
+#if MICROPY_PY_MACHINE_WDT
+#define MICROPY_PY_MACHINE_WDT_ENTRY \
+    { MP_ROM_QSTR(MP_QSTR_starve_wdt),         MP_ROM_PTR(&machine_starve_wdt_obj) },
+#else
+#define MICROPY_PY_MACHINE_WDT_ENTRY
+#endif
+
 #if MICROPY_PY_MACHINE_DFU_BOOTLOADER
 #define MICROPY_PY_MACHINE_DFU_BOOTLOADER_ENTRY \
     { MP_ROM_QSTR(MP_QSTR_enter_ota_dfu),      MP_ROM_PTR(&machine_enter_ota_dfu_obj) }, \
@@ -93,6 +103,7 @@
 
 #define MICROPY_PY_MACHINE_EXTRA_GLOBALS \
     MICROPY_PY_MACHINE_DFU_BOOTLOADER_ENTRY \
+    MICROPY_PY_MACHINE_WDT_ENTRY \
     { MP_ROM_QSTR(MP_QSTR_info),               MP_ROM_PTR(&machine_info_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_sleep),              MP_ROM_PTR(&machine_lightsleep_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_Pin),                MP_ROM_PTR(&pin_type) }, \
@@ -214,6 +225,15 @@ static mp_obj_t machine_enter_serial_dfu(void) {
     return mp_const_none;
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_enter_serial_dfu_obj, machine_enter_serial_dfu);
+#endif
+
+#if MICROPY_HW_ENABLE_WDT
+// Stop feeding the watchdog so the device resets after the timeout.
+static mp_obj_t machine_starve_wdt(void) {
+    wdt_starve = true;
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_0(machine_starve_wdt_obj, machine_starve_wdt);
 #endif
 
 static void mp_machine_idle(void) {
