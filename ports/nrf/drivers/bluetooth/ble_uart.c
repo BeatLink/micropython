@@ -32,6 +32,7 @@
 #include "shared/runtime/interrupt_char.h"
 #include "py/mphal.h"
 #include "py/runtime.h"
+#include "wdt.h"
 
 #if MICROPY_PY_SYS_STDFILES
 #include "py/stream.h"
@@ -107,6 +108,8 @@ int mp_ble_uart_stdin_rx_chr(void) {
 }
 
 mp_uint_t mp_ble_uart_stdout_tx_strn(const char *str, size_t len) {
+    wdt_feed(false);
+
     // Not connected: drop output
     if (!ble_uart_enabled()) return 0;
 
