@@ -152,6 +152,23 @@ static int spi_find(mp_obj_t id) {
 }
 
 void spi_transfer(const machine_hard_spi_obj_t *self, size_t len, const void *src, void *dest) {
+    #if NRFX_SPIM_ENABLED
+    // EasyDMA can only read RAM, so data that lives in flash goes out through a small RAM buffer.
+    if (src != NULL && !nrfx_is_in_ram(src)) {
+        uint8_t buf[64];
+        while (len > 0) {
+            size_t n = len < sizeof(buf) ? len : sizeof(buf);
+            memcpy(buf, src, n);
+            spi_transfer(self, n, buf, dest);
+            src = (const uint8_t *)src + n;
+            if (dest != NULL) {
+                dest = (uint8_t *)dest + n;
+            }
+            len -= n;
+        }
+        return;
+    }
+    #endif
     nrfx_spi_xfer_desc_t xfer_desc = {
         .p_tx_buffer = src,
         .tx_length = len,

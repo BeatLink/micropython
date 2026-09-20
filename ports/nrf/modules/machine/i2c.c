@@ -184,6 +184,14 @@ int machine_hard_i2c_transfer_single(mp_obj_base_t *self_in, uint16_t addr, size
         nrfx_twi_xfer_desc_t desc = NRFX_TWI_XFER_DESC_RX(addr, buf, len);
         err_code = nrfx_twi_xfer(&self->p_twi, &desc, 0);
     } else {
+        #if NRFX_TWIM_ENABLED
+        // EasyDMA can only read RAM, so data that lives in flash goes out through a RAM copy.
+        if (!nrfx_is_in_ram(buf)) {
+            uint8_t *copy = alloca(len);
+            memcpy(copy, buf, len);
+            buf = copy;
+        }
+        #endif
         nrfx_twi_xfer_desc_t desc = NRFX_TWI_XFER_DESC_TX(addr, buf, len);
         uint32_t xfer_flags = (flags & MP_MACHINE_I2C_FLAG_STOP) ? 0 : NRFX_TWI_FLAG_TX_NO_STOP;
         err_code = nrfx_twi_xfer(&self->p_twi, &desc, xfer_flags);
