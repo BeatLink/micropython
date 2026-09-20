@@ -26,18 +26,19 @@
 
 #define MICROPY_HW_BOARD_NAME       "Pine64 PineTime"
 #define MICROPY_HW_NUS_NAME         "PineTime"
+#define MICROPY_PY_BLE_NUS          (1)
 #define MICROPY_HW_MCU_NAME         "NRF52832"
 #define MICROPY_PY_SYS_PLATFORM     "nrf52"
 
 #define MICROPY_PY_MACHINE_UART     (0)
 #define MICROPY_PY_MACHINE_HW_PWM   (1)
-#define MICROPY_PY_MACHINE_HW_SPI   (1)
-#define MICROPY_PY_MACHINE_TIMER    (1)
+#define MICROPY_PY_MACHINE_SPI      (1)
+#define MICROPY_PY_MACHINE_TIMER_NRF (1)
 #define MICROPY_PY_MACHINE_RTCOUNTER (1)
 #define MICROPY_PY_MACHINE_I2C      (1)
 #define MICROPY_PY_MACHINE_ADC      (1)
 #define MICROPY_PY_MACHINE_TEMP     (1)
-#define MICROPY_PY_RANDOM_HW_RNG    (1)
+#define MICROPY_HW_ENABLE_RNG       (1)
 #define MICROPY_PY_MACHINE_DFU_BOOTLOADER (1)
 #define MICROPY_PY_MACHINE_WDT      (1)
 

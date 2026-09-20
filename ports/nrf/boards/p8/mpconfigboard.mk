@@ -6,3 +6,5 @@ LD_FILES += boards/nrf52832_512k_64k_bldr78.ld
 
 NRF_DEFINES += -DNRF52832_XXAA
 
+
+MICROPY_VFS_LFS2 = 1
