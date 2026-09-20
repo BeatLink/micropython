@@ -40,7 +40,7 @@
 #define MICROPY_PY_MACHINE_TEMP     (1)
 #define MICROPY_HW_ENABLE_RNG       (1)
 #define MICROPY_PY_MACHINE_DFU_BOOTLOADER (1)
-#define MICROPY_PY_MACHINE_WDT      (1)
+#define MICROPY_HW_ENABLE_WDT      (1)
 
 #define MICROPY_EMIT_THUMB          (1)
 

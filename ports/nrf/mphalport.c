@@ -251,7 +251,7 @@ int mp_hal_stdin_rx_chr(void) {
             return dupterm_c;
         }
         #endif
-        #if MICROPY_PY_MACHINE_WDT
+        #if MICROPY_HW_ENABLE_WDT
         wdt_feed(false);
         #endif
         MICROPY_EVENT_POLL_HOOK

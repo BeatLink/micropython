@@ -49,7 +49,7 @@
 #if MICROPY_PY_MACHINE_RTCOUNTER
 #include "rtcounter.h"
 #endif
-#if MICROPY_PY_MACHINE_WDT
+#if MICROPY_HW_ENABLE_WDT
 #include "wdt.h"
 #endif
 
@@ -86,7 +86,7 @@
 #define MICROPY_PY_MACHINE_NFC_RESET_ENTRY
 #endif
 
-#if MICROPY_PY_MACHINE_WDT
+#if MICROPY_HW_ENABLE_WDT
 #define MICROPY_PY_MACHINE_WDT_ENTRY \
     { MP_ROM_QSTR(MP_QSTR_starve_wdt),         MP_ROM_PTR(&machine_starve_wdt_obj) },
 #else

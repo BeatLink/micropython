@@ -26,7 +26,7 @@
 
 #include "py/mphal.h"
 
-#if MICROPY_PY_MACHINE_WDT
+#if MICROPY_HW_ENABLE_WDT
 
 #include "wdt.h"
 #include "nrf_wdt.h"
@@ -101,4 +101,4 @@ void wdt_feed(bool isr)
     nrf_wdt_reload_request_set(NRF_WDT, NRF_WDT_RR0);
 }
 
-#endif // MICROPY_PY_MACHINE_WDT
+#endif // MICROPY_HW_ENABLE_WDT

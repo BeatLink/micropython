@@ -118,7 +118,7 @@ void MP_NORETURN _start(void) {
 
 soft_reset:
 
-    #if MICROPY_PY_MACHINE_WDT
+    #if MICROPY_HW_ENABLE_WDT
     wdt_init();
     #endif
 
