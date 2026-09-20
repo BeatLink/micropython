@@ -46,6 +46,7 @@
 #if MICROPY_PY_TIME_TICKS
 #include "nrfx_rtc.h"
 #include "nrf_clock.h"
+#include "soc/nrfx_coredep.h"
 #endif
 
 #if !defined(USE_WORKAROUND_FOR_ANOMALY_132) && \
@@ -67,23 +68,19 @@ ringbuf_t stdin_ringbuf = { stdin_ringbuf_array, sizeof(stdin_ringbuf_array), 0,
 
 
 void mp_nrf_start_lfclk(void) {
-    if (!nrf_clock_lf_start_task_status_get(NRF_CLOCK)) {
-        // Check if the clock was recently stopped but is still running.
-        #if USE_WORKAROUND_FOR_ANOMALY_132
-        bool was_running = nrf_clock_lf_is_running(NRF_CLOCK);
-        // If so, wait for it to stop. This ensures that the delay for anomaly 132 workaround does
-        // not land us in the middle of the forbidden interval.
-        while (nrf_clock_lf_is_running(NRF_CLOCK)) {
-        }
-        // If the clock just stopped, we can start it again right away as we are certainly before
-        // the forbidden 66-138us interval. Otherwise, apply a delay of 138us to make sure we are
-        // after the interval.
-        if (!was_running) {
-            nrfx_coredep_delay_us(138);
-        }
-        #endif
-        nrf_clock_task_trigger(NRF_CLOCK, NRF_CLOCK_TASK_LFCLKSTART);
+    if (nrf_clock_lf_start_task_status_get(NRF_CLOCK)) {
+        return;
     }
+    #if USE_WORKAROUND_FOR_ANOMALY_132
+    // A clock that was just stopped keeps running for a moment, so wait for it to settle.
+    // The wait is bounded because a bootloader can hand over with the clock simply left running.
+    for (int i = 0; i < 10 && nrf_clock_lf_is_running(NRF_CLOCK); i++) {
+        nrfx_coredep_delay_us(100);
+    }
+    // Stay clear of the 66-138us window after a stop in which restarting the clock misbehaves.
+    nrfx_coredep_delay_us(138);
+    #endif
+    nrf_clock_task_trigger(NRF_CLOCK, NRF_CLOCK_TASK_LFCLKSTART);
 }
 
 #if MICROPY_PY_TIME_TICKS
@@ -148,6 +145,9 @@ void rtc1_init_time_ticks(void) {
     mp_nrf_start_lfclk();
     // Uninitialize first, then set overflow IRQ and first CC event
     nrfx_rtc_uninit(&rtc1);
+    // A bootloader can hand over with this RTC still running, and the stop above takes two 32kHz cycles to land.
+    // The prescaler write below is ignored until then, so wait it out.
+    nrfx_coredep_delay_us(100);
     nrfx_rtc_init(&rtc1, &rtc_config_time_ticks, rtc_irq_time);
     nrfx_rtc_overflow_enable(&rtc1, true);
     RTC_RESCHEDULE_CC(rtc1, 0, RTC_TICK_INCREASE_MSEC)

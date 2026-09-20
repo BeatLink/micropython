@@ -30,6 +30,7 @@
 #include "rtcounter.h"
 #include "wdt.h"
 #include "nrfx_rtc.h"
+#include "soc/nrfx_coredep.h"
 #include "nrf_clock.h"
 
 #if MICROPY_PY_MACHINE_RTCOUNTER
@@ -205,6 +206,9 @@ static mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, s
 
     // Make sure it's uninitialized.
     nrfx_rtc_uninit(self->p_rtc);
+    // A bootloader can hand over with the RTC still running, and the stop takes two 32kHz cycles to land.
+    // The prescaler write in the init below is ignored until then, so wait it out.
+    nrfx_coredep_delay_us(100);
     nrfx_rtc_counter_clear(self->p_rtc);
 
     // Initialize and set the correct IRQ.
