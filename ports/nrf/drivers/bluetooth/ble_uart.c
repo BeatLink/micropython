@@ -90,7 +90,8 @@ ringBuffer_typedef(uint8_t, ringbuffer_t);
 
 static ringbuffer_t   m_rx_ring_buffer;
 static ringbuffer_t * mp_rx_ring_buffer = &m_rx_ring_buffer;
-static uint8_t        m_rx_ring_buffer_data[128];
+// Large enough to hold a whole transfer window while Python is busy writing to flash.
+static uint8_t        m_rx_ring_buffer_data[1024];
 
 static ubluepy_advertise_data_t m_adv_data_uart_service;
 
@@ -274,7 +275,8 @@ void ble_uart_init0(void) {
     m_cccd_enabled = false;
 
     // initialize ring buffer
-    m_rx_ring_buffer.size = sizeof(m_rx_ring_buffer_data) + 1;
+    // The ring indexes up to size - 1, so size must not exceed the array.
+    m_rx_ring_buffer.size = sizeof(m_rx_ring_buffer_data);
     m_rx_ring_buffer.start = 0;
     m_rx_ring_buffer.end = 0;
     m_rx_ring_buffer.elems = m_rx_ring_buffer_data;
