@@ -72,6 +72,15 @@
 #else
   #define MAX_TX_IN_PROGRESS         (10)
 #endif
+// A board that never scans or connects out can drop the central role and the RAM the SoftDevice keeps for it.
+#ifndef BLE_DRV_CENTRAL_ROLE_COUNT
+  #define BLE_DRV_CENTRAL_ROLE_COUNT (1)
+#endif
+
+// The end of the RAM the SoftDevice uses, from the linker script.
+extern char _sd_ram_used[];
+#define BLE_DRV_APP_RAM_START (0x20000000 + (uint32_t)_sd_ram_used)
+
 #if !defined(GATT_MTU_SIZE_DEFAULT) && defined(BLE_GATT_ATT_MTU_DEFAULT)
   #define GATT_MTU_SIZE_DEFAULT BLE_GATT_ATT_MTU_DEFAULT
 #endif
@@ -177,9 +186,9 @@ uint32_t ble_drv_stack_enable(void) {
     ble_enable_params.gatts_enable_params.service_changed  = 0;
 #else
     ble_cfg_t ble_conf;
-    uint32_t app_ram_start_cfg = 0x200039c0;
+    uint32_t app_ram_start_cfg = BLE_DRV_APP_RAM_START;
     ble_conf.conn_cfg.conn_cfg_tag                     = BLE_DRV_CONN_CONFIG_TAG;
-    ble_conf.conn_cfg.params.gap_conn_cfg.conn_count   = 2;
+    ble_conf.conn_cfg.params.gap_conn_cfg.conn_count   = 1 + BLE_DRV_CENTRAL_ROLE_COUNT;
     ble_conf.conn_cfg.params.gap_conn_cfg.event_length = 3;
     err_code = sd_ble_cfg_set(BLE_CONN_CFG_GAP, &ble_conf, app_ram_start_cfg);
 
@@ -188,7 +197,7 @@ uint32_t ble_drv_stack_enable(void) {
     memset(&ble_conf, 0, sizeof(ble_conf));
 
     ble_conf.gap_cfg.role_count_cfg.periph_role_count   = 1;
-    ble_conf.gap_cfg.role_count_cfg.central_role_count  = 1;
+    ble_conf.gap_cfg.role_count_cfg.central_role_count  = BLE_DRV_CENTRAL_ROLE_COUNT;
     ble_conf.gap_cfg.role_count_cfg.central_sec_count   = 0;
     err_code = sd_ble_cfg_set(BLE_GAP_CFG_ROLE_COUNT, &ble_conf, app_ram_start_cfg);
 
@@ -205,8 +214,8 @@ uint32_t ble_drv_stack_enable(void) {
 #if (BLUETOOTH_SD == 110)
     err_code = sd_ble_enable(&ble_enable_params);
 #else
-    uint32_t app_ram_start = 0x200039c0;
-    err_code = sd_ble_enable(&app_ram_start); // 8K SD headroom from linker script.
+    uint32_t app_ram_start = BLE_DRV_APP_RAM_START;
+    err_code = sd_ble_enable(&app_ram_start);
     BLE_DRIVER_LOG("BLE ram size: " UINT_FMT "\n", (uint16_t)app_ram_start);
 #endif
 

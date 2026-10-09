@@ -108,6 +108,8 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
 
 extern uint32_t _heap_start;
 extern uint32_t _heap_end;
+extern char _sd_ram[];
+extern char _sd_ram_used[];
 
 void MP_NORETURN _start(void) {
     // Hook for a board to run code at start up, for example check if a
@@ -135,6 +137,13 @@ soft_reset:
     machine_init();
 
     gc_init(&_heap_start, &_heap_end);
+    #if MICROPY_GC_SPLIT_HEAP
+    // Lend the heap the SoftDevice RAM its configuration leaves unused; a soft reset must not add it twice.
+    MP_STATE_MEM(area).next = NULL;
+    if ((uint32_t)_sd_ram_used < (uint32_t)_sd_ram) {
+        gc_add((void *)(0x20000000 + (uint32_t)_sd_ram_used), (void *)(0x20000000 + (uint32_t)_sd_ram));
+    }
+    #endif
 
     mp_init();
     readline_init0();

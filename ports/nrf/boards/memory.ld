@@ -8,6 +8,8 @@ _head_size     = DEFINED(_sd_size) ? _sd_size : _bootloader_head_size;
 _head_ram      = DEFINED(_sd_ram)  ? _sd_ram : _bootloader_head_ram_size;
 _sd_size       = DEFINED(_sd_size) ? _sd_size : 0;
 _sd_ram        = DEFINED(_sd_ram)  ? _sd_ram : 0;
+/* How much of _sd_ram the SoftDevice is configured to use; a board may give the rest to the heap. */
+_sd_ram_used   = DEFINED(_sd_ram_used) ? _sd_ram_used : _sd_ram;
 _micropy_hw_romfs_part0_size = DEFINED(_micropy_hw_romfs_part0_size) ? _micropy_hw_romfs_part0_size : 0;
 _pnvram        = 32;
 _fs_size       = DEFINED(_fs_size) ? _fs_size : 64K; /* TODO: set to 0 if not using the filesystem */

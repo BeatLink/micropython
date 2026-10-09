@@ -27,6 +27,10 @@
 #define MICROPY_HW_BOARD_NAME       "Pine64 PineTime"
 #define MICROPY_HW_NUS_NAME         "PineTime"
 #define MICROPY_PY_BLE_NUS          (1)
+// The watch is only ever a peripheral.
+#define BLE_DRV_CENTRAL_ROLE_COUNT  (0)
+// The heap takes the SoftDevice RAM that a peripheral-only configuration leaves unused.
+#define MICROPY_GC_SPLIT_HEAP       (1)
 #define MICROPY_HW_MCU_NAME         "NRF52832"
 #define MICROPY_PY_SYS_PLATFORM     "nrf52"
 
