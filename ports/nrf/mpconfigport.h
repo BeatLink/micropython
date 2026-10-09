@@ -178,7 +178,9 @@
 #define MICROPY_PY_BUILTINS_MEMORYVIEW (1)
 #define MICROPY_PY_BUILTINS_FROZENSET (1)
 #define MICROPY_PY_BUILTINS_COMPILE (1)
+#ifndef MICROPY_PY_BUILTINS_HELP
 #define MICROPY_PY_BUILTINS_HELP    (1)
+#endif
 #define MICROPY_PY_BUILTINS_HELP_TEXT nrf5_help_text
 #define MICROPY_PY_BUILTINS_HELP_MODULES (1)
 #define MICROPY_PY_BUILTINS_INPUT   (1)
@@ -293,7 +295,9 @@
 #define MICROPY_MULTIPLE_INHERITANCE          (1)
 #define MICROPY_PY_ARRAY                      (1)
 #define MICROPY_PY_ASSIGN_EXPR                (1)
+#ifndef MICROPY_PY_ASYNC_AWAIT
 #define MICROPY_PY_ASYNC_AWAIT                (1)
+#endif
 #define MICROPY_PY_ATTRTUPLE                  (1)
 #define MICROPY_PY_BUILTINS_BYTEARRAY         (1)
 #define MICROPY_PY_BUILTINS_DICT_FROMKEYS     (1)
