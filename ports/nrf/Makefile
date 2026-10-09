@@ -143,10 +143,10 @@ LTO ?= 1
 
 ifeq ($(LTO),1)
 CFLAGS += -flto
-else
+endif
+# LTO alone keeps unreferenced library code, such as most of libm, so drop it at link time too.
 CFLAGS += -ffunction-sections -fdata-sections
 LDFLAGS += -Wl,--gc-sections
-endif
 
 CFLAGS += $(CFLAGS_MCU_$(MCU_SERIES))
 CFLAGS += $(INC) -Wall -Werror -std=c11 $(COPT) $(NRF_DEFINES) $(CFLAGS_EXTRA)
