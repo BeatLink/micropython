@@ -47,7 +47,9 @@
 #define MICROPY_PY_MACHINE_DFU_BOOTLOADER (1)
 #define MICROPY_HW_ENABLE_WDT      (1)
 
-#define MICROPY_EMIT_THUMB          (1)
+// Native code is compiled on the host by mpy-cross, so the watch keeps only what runs it and loads it.
+#define MICROPY_EMIT_THUMB          (0)
+#define MICROPY_PERSISTENT_CODE_LOAD_NATIVE (1)
 
 // wasp-os needs none of these, and the flash and heap they take are scarce.
 #define MICROPY_PY_BUILTINS_HELP    (0)
