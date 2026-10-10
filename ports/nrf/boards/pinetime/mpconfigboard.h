@@ -57,6 +57,8 @@
 #define MICROPY_PY_ASYNC_AWAIT      (0)
 // Each history entry holds a REPL line on the heap, and the companion sends every message as one.
 #define MICROPY_READLINE_HISTORY_SIZE (1)
+// wasp-os runs the companion's GB({...}) lines by decoding their JSON, without the compiler.
+#define MICROPY_REPL_LINE_HOOK      (1)
 
 #define MICROPY_HW_HAS_LED          (0)
 #define MICROPY_HW_LED_COUNT        (0)

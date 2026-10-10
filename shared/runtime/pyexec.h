@@ -49,6 +49,16 @@ extern pyexec_mode_kind_t pyexec_mode_kind;
 #endif
 
 int pyexec_raw_repl(void);
+
+#ifndef MICROPY_REPL_LINE_HOOK
+#define MICROPY_REPL_LINE_HOOK (0)
+#endif
+
+#if MICROPY_REPL_LINE_HOOK
+// Defined by the port: run a friendly REPL line without compiling it, returning true if it did.
+bool pyexec_repl_line_hook(vstr_t *line);
+#endif
+
 int pyexec_friendly_repl(void);
 int pyexec_file(const char *filename);
 int pyexec_file_if_exists(const char *filename);

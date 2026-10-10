@@ -722,6 +722,12 @@ friendly_repl_reset:
             }
         }
 
+        #if MICROPY_REPL_LINE_HOOK
+        if (parse_input_kind == MP_PARSE_SINGLE_INPUT && pyexec_repl_line_hook(&line)) {
+            continue;
+        }
+        #endif
+
         // Switch to original terminal mode to execute code, eg to support keyboard interrupt (SIGINT).
         mp_hal_stdio_mode_orig();
         ret = parse_compile_execute(&line, parse_input_kind, EXEC_FLAG_ALLOW_DEBUGGING | EXEC_FLAG_IS_REPL | EXEC_FLAG_SOURCE_IS_VSTR);
