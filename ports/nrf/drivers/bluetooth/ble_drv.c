@@ -67,6 +67,9 @@
 #define BLE_SLAVE_LATENCY            0
 #define BLE_CONN_SUP_TIMEOUT         MSEC_TO_UNITS(4000, UNIT_10_MS)
 
+// S112 has the S132 API without the central role, scanning, data length extension or L2CAP channels.
+#define BLE_DRV_SD_V6 ((BLUETOOTH_SD == 112) || (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140))
+
 #if (BLUETOOTH_SD == 110)
   #define MAX_TX_IN_PROGRESS         (6)
 #else
@@ -100,7 +103,7 @@ static ble_drv_gatts_evt_callback_t        gatts_event_handler;
 static mp_obj_t mp_gap_observer;
 static mp_obj_t mp_gatts_observer;
 
-#if ((BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)) && MICROPY_PY_UBLUEPY_CENTRAL
+#if BLE_DRV_SD_V6 && MICROPY_PY_UBLUEPY_CENTRAL
 static volatile bool m_primary_service_found;
 static volatile bool m_characteristic_found;
 static volatile bool m_write_done;
@@ -118,7 +121,7 @@ static mp_obj_t mp_gattc_disc_char_observer;
 static mp_obj_t mp_gattc_char_data_observer;
 #endif
 
-#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#if BLE_DRV_SD_V6
 #include "nrf_nvic.h"
 #define BLE_GAP_ADV_MAX_SIZE 31
 #define BLE_DRV_CONN_CONFIG_TAG 1
@@ -155,7 +158,7 @@ uint32_t ble_drv_stack_enable(void) {
   #endif // BLUETOOTH_LFCLK_RC
 #endif // (BLUETOOTH_SD == 110)
 
-#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#if BLE_DRV_SD_V6
   #if BLUETOOTH_LFCLK_RC
     nrf_clock_lf_cfg_t clock_config = {
         .source = NRF_CLOCK_LF_SRC_RC,
@@ -174,7 +177,7 @@ uint32_t ble_drv_stack_enable(void) {
 
     uint32_t err_code = sd_softdevice_enable(&clock_config,
                                              softdevice_assert_handler);
-#endif // (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#endif // BLE_DRV_SD_V6
 
     BLE_DRIVER_LOG("SoftDevice enable status: " UINT_FMT "\n", (uint16_t)err_code);
 
@@ -200,8 +203,10 @@ uint32_t ble_drv_stack_enable(void) {
     memset(&ble_conf, 0, sizeof(ble_conf));
 
     ble_conf.gap_cfg.role_count_cfg.periph_role_count   = 1;
+#if BLUETOOTH_SD != 112 // S112 has no central role, so its role count has no central fields
     ble_conf.gap_cfg.role_count_cfg.central_role_count  = BLE_DRV_CENTRAL_ROLE_COUNT;
     ble_conf.gap_cfg.role_count_cfg.central_sec_count   = 0;
+#endif
     err_code = sd_ble_cfg_set(BLE_GAP_CFG_ROLE_COUNT, &ble_conf, app_ram_start_cfg);
 
     BLE_DRIVER_LOG("BLE_GAP_CFG_ROLE_COUNT status: " UINT_FMT "\n", (uint16_t)err_code);
@@ -574,7 +579,7 @@ bool ble_drv_advertise_data(ubluepy_advertise_data_t * p_adv_params) {
 
     // scan response data not set
     uint32_t err_code;
-#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#if BLE_DRV_SD_V6
     const ble_gap_adv_data_t m_adv_data = {
         .adv_data.p_data      = adv_data,
         .adv_data.len         = byte_pos,
@@ -740,7 +745,7 @@ void ble_drv_gatts_event_handler_set(mp_obj_t obj, ble_drv_gatts_evt_callback_t 
     gatts_event_handler = evt_handler;
 }
 
-#if ((BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)) && MICROPY_PY_UBLUEPY_CENTRAL
+#if BLE_DRV_SD_V6 && MICROPY_PY_UBLUEPY_CENTRAL
 
 void ble_drv_gattc_event_handler_set(mp_obj_t obj, ble_drv_gattc_evt_callback_t evt_handler) {
     mp_gattc_observer = obj;
@@ -942,7 +947,7 @@ void ble_drv_discover_descriptors(void) {
 
 }
 
-#endif // (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#endif // BLE_DRV_SD_V6
 
 static void sd_evt_handler(uint32_t evt_id) {
     switch (evt_id) {
@@ -1015,13 +1020,13 @@ static void ble_evt_handler(ble_evt_t * p_ble_evt) {
             (void)sd_ble_gatts_sys_attr_set(p_ble_evt->evt.gatts_evt.conn_handle, NULL, 0, 0);
             break;
 
-#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#if BLE_DRV_SD_V6
         case BLE_GATTS_EVT_HVN_TX_COMPLETE:
 #else
         case BLE_EVT_TX_COMPLETE:
 #endif
             BLE_DRIVER_LOG("BLE EVT TX COMPLETE\n");
-#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#if BLE_DRV_SD_V6
             BLE_DRIVER_LOG("HVN_TX_COMPLETE, count: %u\n", p_ble_evt->evt.gatts_evt.params.hvn_tx_complete.count);
             m_tx_in_progress -= p_ble_evt->evt.gatts_evt.params.hvn_tx_complete.count;
             BLE_DRIVER_LOG("TX_COMPLETE, m_tx_in_progress: %u\n", m_tx_in_progress);
@@ -1040,7 +1045,7 @@ static void ble_evt_handler(ble_evt_t * p_ble_evt) {
                                               NULL, NULL);
             break;
 
-#if ((BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)) && MICROPY_PY_UBLUEPY_CENTRAL
+#if BLE_DRV_SD_V6 && MICROPY_PY_UBLUEPY_CENTRAL
         case BLE_GAP_EVT_ADV_REPORT:
             BLE_DRIVER_LOG("BLE EVT ADV REPORT\n");
             ble_drv_adv_data_t adv_data = {
@@ -1150,16 +1155,19 @@ static void ble_evt_handler(ble_evt_t * p_ble_evt) {
 
 #endif
 
-#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#if BLE_DRV_SD_V6
         case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
             BLE_DRIVER_LOG("GATTS EVT EXCHANGE MTU REQUEST\n");
             (void)sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, 23); // MAX MTU size
             break;
 
+#if BLUETOOTH_SD != 112
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
             BLE_DRIVER_LOG("BLE GAP EVT DATA LENGTH UPDATE REQUEST\n");
             sd_ble_gap_data_length_update(p_ble_evt->evt.gap_evt.conn_handle, NULL, NULL);
             break;
+
+#endif
 
         case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
             BLE_DRIVER_LOG("BLE_GAP_EVT_PHY_UPDATE_REQUEST\n");
@@ -1175,11 +1183,13 @@ static void ble_evt_handler(ble_evt_t * p_ble_evt) {
             BLE_DRIVER_LOG("BLE_GAP_EVT_PHY_UPDATE -- unhandled!\n");
             break;
 
+#if BLUETOOTH_SD != 112
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE:
             BLE_DRIVER_LOG("BLE_GAP_EVT_DATA_LENGTH_UPDATE -- unhandled!\n");
             break;
+#endif
 
-#endif // (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#endif // BLE_DRV_SD_V6
 
         default:
             BLE_DRIVER_LOG(">>> unhandled evt: 0x" HEX2_FMT "\n", p_ble_evt->header.evt_id);

@@ -9,5 +9,9 @@ NRF_DEFINES += -DNRF52832_XXAA
 
 MICROPY_VFS_LFS2 = 1
 
-# sd_ble_enable() reports 0x200023a8 for this board's BLE configuration; the rest of the reservation goes to the heap.
+# sd_ble_enable() reports 0x200023a8 (s132) or 0x20001ca0 (s112) for this board's BLE configuration; the rest of the reservation goes to the heap.
+ifeq ($(SD),s112)
+LDFLAGS += -Wl,--defsym=_sd_ram_used=0x1d00
+else
 LDFLAGS += -Wl,--defsym=_sd_ram_used=0x2400
+endif

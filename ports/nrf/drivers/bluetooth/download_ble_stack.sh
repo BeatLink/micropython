@@ -16,6 +16,24 @@ function download_s110_nrf51_8_0_0
     cd -
 }
 
+function download_s112_nrf52_6_1_1
+{
+    echo ""
+    echo "####################################"
+    echo "### Downloading s112_nrf52_6.1.1 ###"
+    echo "####################################"
+    echo ""
+
+    mkdir -p $1/s112_nrf52_6.1.1
+    cd $1/s112_nrf52_6.1.1
+    wget https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/softdevices/s112/s112nrf52611.zip
+    # The SoftDevice runs below the bootloader, so refuse any archive but the one Nordic published.
+    echo "2a51b1ef50f6d60cd9a9ca9ffd326cf582a03c696f133ba902c2a138f80655ab  s112nrf52611.zip" | sha256sum -c - || exit 1
+    unzip -u s112nrf52611.zip
+    rm s112nrf52611.zip
+    cd -
+}
+
 function download_s132_nrf52_6_1_1
 {
     echo ""
@@ -69,6 +87,7 @@ SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ $# -eq 0 ]; then
     echo "No Bluetooth LE stack defined, downloading all."
     download_s110_nrf51_8_0_0 ${SCRIPT_DIR}
+    download_s112_nrf52_6_1_1 ${SCRIPT_DIR}
     download_s132_nrf52_6_1_1 ${SCRIPT_DIR}
     download_s140_nrf52_6_1_1 ${SCRIPT_DIR}
     download_s140_nrf52_7_3_0 ${SCRIPT_DIR}
@@ -76,6 +95,8 @@ else
     case $1 in
         "s110_nrf51" )
             download_s110_nrf51_8_0_0 ${SCRIPT_DIR} ;;
+        "s112_nrf52_6_1_1" )
+            download_s112_nrf52_6_1_1 ${SCRIPT_DIR} ;;
         "s132_nrf52_6_1_1" )
             download_s132_nrf52_6_1_1 ${SCRIPT_DIR} ;;
         "s140_nrf52_6_1_1" )

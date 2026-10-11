@@ -16,6 +16,17 @@
 #define MICROPY_PY_UBLUEPY              (1)
 #define MICROPY_PY_UBLUEPY_PERIPHERAL   (1)
 
+#elif (BLUETOOTH_SD == 112)
+
+// S112 is peripheral only, so ubluepy has no central role to offer.
+#define MICROPY_PY_BLE                  (1)
+#define BLUETOOTH_WEBBLUETOOTH_REPL     (0)
+#define MICROPY_PY_UBLUEPY              (1)
+#ifndef MICROPY_PY_UBLUEPY_PERIPHERAL
+#define MICROPY_PY_UBLUEPY_PERIPHERAL   (1)
+#endif
+#define MICROPY_PY_UBLUEPY_CENTRAL      (0)
+
 #elif (BLUETOOTH_SD == 132)
 
 #define MICROPY_PY_BLE                  (1)
