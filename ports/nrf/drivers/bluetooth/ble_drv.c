@@ -100,7 +100,7 @@ static ble_drv_gatts_evt_callback_t        gatts_event_handler;
 static mp_obj_t mp_gap_observer;
 static mp_obj_t mp_gatts_observer;
 
-#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#if ((BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)) && MICROPY_PY_UBLUEPY_CENTRAL
 static volatile bool m_primary_service_found;
 static volatile bool m_characteristic_found;
 static volatile bool m_write_done;
@@ -124,7 +124,9 @@ static mp_obj_t mp_gattc_char_data_observer;
 #define BLE_DRV_CONN_CONFIG_TAG 1
 
 static uint8_t m_adv_handle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;
+#if MICROPY_PY_UBLUEPY_CENTRAL
 static uint8_t m_scan_buffer[BLE_GAP_SCAN_BUFFER_MIN];
+#endif
 
 nrf_nvic_state_t nrf_nvic_state = {{0}, 0};
 #endif
@@ -738,7 +740,7 @@ void ble_drv_gatts_event_handler_set(mp_obj_t obj, ble_drv_gatts_evt_callback_t 
     gatts_event_handler = evt_handler;
 }
 
-#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#if ((BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)) && MICROPY_PY_UBLUEPY_CENTRAL
 
 void ble_drv_gattc_event_handler_set(mp_obj_t obj, ble_drv_gattc_evt_callback_t evt_handler) {
     mp_gattc_observer = obj;
@@ -1038,7 +1040,7 @@ static void ble_evt_handler(ble_evt_t * p_ble_evt) {
                                               NULL, NULL);
             break;
 
-#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
+#if ((BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)) && MICROPY_PY_UBLUEPY_CENTRAL
         case BLE_GAP_EVT_ADV_REPORT:
             BLE_DRIVER_LOG("BLE EVT ADV REPORT\n");
             ble_drv_adv_data_t adv_data = {
@@ -1146,6 +1148,9 @@ static void ble_evt_handler(ble_evt_t * p_ble_evt) {
             BLE_DRIVER_LOG("BLE EVT HVX RESPONSE\n");
             break;
 
+#endif
+
+#if (BLUETOOTH_SD == 132) || (BLUETOOTH_SD == 140)
         case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
             BLE_DRIVER_LOG("GATTS EVT EXCHANGE MTU REQUEST\n");
             (void)sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, 23); // MAX MTU size

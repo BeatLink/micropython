@@ -40,46 +40,53 @@
 
 #if MICROPY_PY_BLE_NUS
 
+// These objects never reach Python, so they carry a type only when ubluepy's classes are built.
+#if MICROPY_PY_UBLUEPY_PERIPHERAL
+#define BLE_UART_TYPE(t) .base.type = &t,
+#else
+#define BLE_UART_TYPE(t)
+#endif
+
 static ubluepy_uuid_obj_t uuid_obj_service = {
-    .base.type = &ubluepy_uuid_type,
+    BLE_UART_TYPE(ubluepy_uuid_type)
     .type = UBLUEPY_UUID_128_BIT,
     .value = {0x01, 0x00}
 };
 
 static ubluepy_uuid_obj_t uuid_obj_char_tx = {
-    .base.type = &ubluepy_uuid_type,
+    BLE_UART_TYPE(ubluepy_uuid_type)
     .type = UBLUEPY_UUID_128_BIT,
     .value = {0x03, 0x00}
 };
 
 static ubluepy_uuid_obj_t uuid_obj_char_rx = {
-    .base.type = &ubluepy_uuid_type,
+    BLE_UART_TYPE(ubluepy_uuid_type)
     .type = UBLUEPY_UUID_128_BIT,
     .value = {0x02, 0x00}
 };
 
 static ubluepy_service_obj_t ble_uart_service = {
-    .base.type = &ubluepy_service_type,
+    BLE_UART_TYPE(ubluepy_service_type)
     .p_uuid = &uuid_obj_service,
     .type = UBLUEPY_SERVICE_PRIMARY
 };
 
 static ubluepy_characteristic_obj_t ble_uart_char_rx = {
-    .base.type = &ubluepy_characteristic_type,
+    BLE_UART_TYPE(ubluepy_characteristic_type)
     .p_uuid = &uuid_obj_char_rx,
     .props = UBLUEPY_PROP_WRITE | UBLUEPY_PROP_WRITE_WO_RESP,
     .attrs = 0,
 };
 
 static ubluepy_characteristic_obj_t ble_uart_char_tx = {
-    .base.type = &ubluepy_characteristic_type,
+    BLE_UART_TYPE(ubluepy_characteristic_type)
     .p_uuid = &uuid_obj_char_tx,
     .props = UBLUEPY_PROP_NOTIFY,
     .attrs = UBLUEPY_ATTR_CCCD,
 };
 
 static ubluepy_peripheral_obj_t ble_uart_peripheral = {
-    .base.type = &ubluepy_peripheral_type,
+    BLE_UART_TYPE(ubluepy_peripheral_type)
     .conn_handle = 0xFFFF,
 };
 

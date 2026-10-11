@@ -29,6 +29,9 @@
 #define MICROPY_PY_BLE_NUS          (1)
 // The watch is only ever a peripheral.
 #define BLE_DRV_CENTRAL_ROLE_COUNT  (0)
+#define MICROPY_PY_UBLUEPY_CENTRAL  (0)
+// wasp-os needs only ubluepy.uart_connected, not the classes for building services from Python.
+#define MICROPY_PY_UBLUEPY_PERIPHERAL (0)
 // The heap takes the SoftDevice RAM that a peripheral-only configuration leaves unused.
 #define MICROPY_GC_SPLIT_HEAP       (1)
 #define MICROPY_HW_MCU_NAME         "NRF52832"

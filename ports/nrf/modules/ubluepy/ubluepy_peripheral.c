@@ -30,7 +30,7 @@
 #include "py/objstr.h"
 #include "py/objlist.h"
 
-#if MICROPY_PY_UBLUEPY
+#if MICROPY_PY_UBLUEPY_PERIPHERAL || MICROPY_PY_UBLUEPY_CENTRAL
 
 #include "ble_drv.h"
 
@@ -491,4 +491,4 @@ MP_DEFINE_CONST_OBJ_TYPE(
     locals_dict, &ubluepy_peripheral_locals_dict
     );
 
-#endif // MICROPY_PY_UBLUEPY
+#endif // MICROPY_PY_UBLUEPY_PERIPHERAL || MICROPY_PY_UBLUEPY_CENTRAL
