@@ -93,7 +93,8 @@
 #define MICROPY_VFS                 (1)
 // The filesystem lives on the external SPI flash; the internal region is empty.
 #define MICROPY_HW_ENABLE_INTERNAL_FLASH_STORAGE (0)
-#define MICROPY_VFS_ROM             (0)
+// A ROMFS partition in internal flash, mounted at /rom; see mpconfigboard.mk for its size.
+#define MICROPY_VFS_ROM             (1)
 //MICROPY_VFS_LFS2 is defined via the command line to ensure the
 //library code gets built
 

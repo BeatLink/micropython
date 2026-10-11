@@ -15,3 +15,7 @@ LDFLAGS += -Wl,--defsym=_sd_ram_used=0x1d00
 else
 LDFLAGS += -Wl,--defsym=_sd_ram_used=0x2400
 endif
+
+# Internal flash below the bootloader holds a ROMFS image that runs in place and is rewritten without a firmware update.
+ROMFS_SIZE ?= $(if $(filter s112,$(SD_LOWER)),0x10000,0x4000)
+LDFLAGS += -Wl,--defsym=_micropy_hw_romfs_part0_size=$(ROMFS_SIZE)

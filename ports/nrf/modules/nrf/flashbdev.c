@@ -216,34 +216,4 @@ void flashbdev_init(void) {
     nrf_flash_obj.len = num_pages * FLASH_PAGESIZE;
 }
 
-#if MICROPY_VFS_ROM
-
-extern byte _micropy_hw_romfs_part0_start[];
-extern byte _micropy_hw_romfs_part0_size[];
-
-#define MICROPY_HW_ROMFS_BASE ((uint32_t)_micropy_hw_romfs_part0_start)
-#define MICROPY_HW_ROMFS_BYTES ((uint32_t)_micropy_hw_romfs_part0_size)
-
-static nrf_flash_obj_t nrf_flash_romfs_obj = {
-    .base = { &nrf_flashbdev_type },
-    .start = MICROPY_HW_ROMFS_BASE, // Get from MCU-Specific loader script.
-    .len = MICROPY_HW_ROMFS_BYTES, // Get from MCU-Specific loader script.
-};
-
-mp_obj_t mp_vfs_rom_ioctl(size_t n_args, const mp_obj_t *args) {
-    if (MICROPY_HW_ROMFS_BYTES <= 0) {
-        return MP_OBJ_NEW_SMALL_INT(-MP_EINVAL);
-    }
-    switch (mp_obj_get_int(args[0])) {
-        case MP_VFS_ROM_IOCTL_GET_NUMBER_OF_SEGMENTS:
-            return MP_OBJ_NEW_SMALL_INT(1);
-        case MP_VFS_ROM_IOCTL_GET_SEGMENT:
-            return MP_OBJ_FROM_PTR(&nrf_flash_romfs_obj);
-        default:
-            return MP_OBJ_NEW_SMALL_INT(-MP_EINVAL);
-    }
-}
-
-#endif // MICROPY_VFS_ROM
-
 #endif // MICROPY_PY_NRF && MICROPY_HW_ENABLE_INTERNAL_FLASH_STORAGE

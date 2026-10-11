@@ -249,6 +249,7 @@ SRC_C += \
 	pin_named_pins.c \
 	fatfs_port.c \
 	drivers/flash.c \
+	vfs_rom_ioctl.c \
 	drivers/rng.c \
 	drivers/softpwm.c \
 	drivers/ticker.c \
