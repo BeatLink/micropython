@@ -92,6 +92,7 @@ if (ble_drv_stack_enabled() == 0) { \
 
 static volatile bool m_adv_in_progress;
 static volatile uint8_t m_tx_in_progress;
+static volatile bool m_link_up;
 
 static ble_drv_gap_evt_callback_t          gap_event_handler;
 static ble_drv_gatts_evt_callback_t        gatts_event_handler;
@@ -709,7 +710,11 @@ void ble_drv_attr_s_notify(uint16_t conn_handle, uint16_t handle, uint16_t len, 
     hvx_params.p_len  = &hvx_len;
     hvx_params.p_data = p_data;
 
-    while (m_tx_in_progress > MAX_TX_IN_PROGRESS) {
+    // Wait for a free slot in the SoftDevice's queue, but give up once the link is gone.
+    while (m_tx_in_progress >= MAX_TX_IN_PROGRESS) {
+        if (!m_link_up) {
+            return;
+        }
         wdt_feed(false);
     }
 
@@ -968,6 +973,8 @@ static void ble_evt_handler(ble_evt_t * p_ble_evt) {
         case BLE_GAP_EVT_CONNECTED:
             BLE_DRIVER_LOG("GAP CONNECT\n");
             m_adv_in_progress = false;
+            m_tx_in_progress = 0;
+            m_link_up = true;
             gap_event_handler(mp_gap_observer, p_ble_evt->header.evt_id, p_ble_evt->evt.gap_evt.conn_handle, p_ble_evt->header.evt_len - (2 * sizeof(uint16_t)), NULL);
 
             ble_gap_conn_params_t conn_params;
@@ -977,6 +984,9 @@ static void ble_evt_handler(ble_evt_t * p_ble_evt) {
 
         case BLE_GAP_EVT_DISCONNECTED:
             BLE_DRIVER_LOG("GAP DISCONNECT\n");
+            // The SoftDevice drops queued notifications without reporting them sent, so the count starts again.
+            m_tx_in_progress = 0;
+            m_link_up = false;
             gap_event_handler(mp_gap_observer, p_ble_evt->header.evt_id, p_ble_evt->evt.gap_evt.conn_handle, p_ble_evt->header.evt_len - (2 * sizeof(uint16_t)), NULL);
             break;
 
